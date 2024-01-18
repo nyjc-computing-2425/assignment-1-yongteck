@@ -32,7 +32,7 @@ class TestInputOutput(unittest.TestCase):
     def check_result(self, result: str, answer: str):
         """Test the user's answer against the expected answer."""
         if answer != "":
-            self.assertNotEqual(result.strip(), "", msg=f"No output from program.")
+            self.assertNotEqual(result.strip(), "", msg="No output from program.")
         self.assertIn(result,
           answer,
           msg=f"User output {result!r} != expected output {answer!r}")
@@ -41,19 +41,19 @@ class TestInputOutput(unittest.TestCase):
         testcase = "56\n"
         testans = "The duration is 0 hours, 0 minutes, and 56 seconds.\n"
         userans = invoke_main(testcase)
-        self.test_result(userans, testans)
+        self.check_result(userans, testans)
 
     def test_minutes_and_seconds(self):
         testcase = "2846\n"
         testans = "The duration is 0 hours, 47 minutes, and 26 seconds.\n"
         userans = invoke_main(testcase)
-        self.test_result(userans, testans)        
+        self.check_result(userans, testans)        
 
     def test_part3(self):
         testcase = "3694\n"
         testans = "The duration is 1 hours, 1 minutes, and 34 seconds.\n"
         userans = invoke_main(testcase)
-        self.test_result(userans, testans)        
+        self.check_result(userans, testans)        
             
 
 if __name__ == '__main__':
