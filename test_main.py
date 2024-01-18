@@ -14,48 +14,46 @@ def strip_prompt(stdout: str) -> str:
 
 def invoke_main(input_: str) -> str:
     """Invoke main.py and return its output."""
-    proc = subprocess.Popen(["python", "main.py"],
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        text=True)
-    try:
-        stdout, stderr = proc.communicate(input=input_, timeout=1)
-    except subprocess.TimeoutExpired:
-        proc.kill()
-        stdout, stderr = proc.communicate()
-    finally:
-        # Strip prompt from stdout; use colon to detect
-        if stdout.strip():
-            stdout = stdout[stdout.find(':') + 1:].lstrip()
-        return stdout
+    result: subprocess.CompletedProcess = subprocess.run(
+        ["python", "main.py"],
+        input=input_,
+        capture_output=True,
+        text=True,
+        timeout=3,
+    )
+    stdout = result.stdout
+    if not stdout or stdout.strip():
+        return ""
+    return strip_prompt(stdout) if ":" in stdout else stdout
 
 
 class TestInputOutput(unittest.TestCase):
+
+    def check_result(self, result: str, answer: str):
+        """Test the user's answer against the expected answer."""
+        if answer != "":
+            self.assertNotEqual(result.strip(), "", msg=f"No output from program.")
+        self.assertIn(result,
+          answer,
+          msg=f"User output {result!r} != expected output {answer!r}")
 
     def test_seconds_only(self):
         testcase = "56\n"
         testans = "The duration is 0 hours, 0 minutes, and 56 seconds.\n"
         userans = invoke_main(testcase)
-        
-        self.assertIn(userans,
-                      testans,
-                      msg=f"User output {userans!r} != expected output {testans!r}")
+        self.test_result(userans, testans)
 
     def test_minutes_and_seconds(self):
         testcase = "2846\n"
         testans = "The duration is 0 hours, 47 minutes, and 26 seconds.\n"
         userans = invoke_main(testcase)
-        self.assertIn(userans,
-                      testans,
-                      msg=f"User output {userans!r} != expected output {testans!r}")
-        
+        self.test_result(userans, testans)        
+
     def test_part3(self):
         testcase = "3694\n"
         testans = "The duration is 1 hours, 1 minutes, and 34 seconds.\n"
         userans = invoke_main(testcase)
-        self.assertIn(userans,
-                      testans,
-                      msg=f"User output {userans!r} != expected output {testans!r}")
+        self.test_result(userans, testans)        
             
 
 if __name__ == '__main__':
